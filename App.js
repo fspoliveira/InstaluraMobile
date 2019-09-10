@@ -9,7 +9,6 @@
 import React, { Fragment } from 'react';
 import {
   StyleSheet,
-  Dimensions,
   FlatList
 } from 'react-native';
 
