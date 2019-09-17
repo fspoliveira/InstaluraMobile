@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import {
-  Platform,
   StyleSheet,
   Text,
   View,
   Image,
   Dimensions,
-  FlatList,
+  TextInput,
   TouchableOpacity
 } from 'react-native';
 
@@ -19,14 +18,14 @@ export default class Post extends Component {
     this.state = {
       // foto: { ...this.props.foto, likers: [{}] }
       //foto: this.props.foto
-      foto: { ...this.props.foto, likers: [{}, {}] }
+      foto: { ...this.props.foto, likers: [{}, {}] },
+      valorComentario: ''
     }
   }
 
   carregaIcone(likeada) {
     return likeada ? require('../../resources/img/s2-checked.png') : require('../../resources/img/s2.png')
   }
-
 
   like() {
     const { foto } = this.state;
@@ -40,7 +39,7 @@ export default class Post extends Component {
     } else {
       novaLista = foto.likers.filter(liker => {
         return liker.login !== 'meuUsuario'
-       });
+      });
     }
 
     const fotoAtualizada = {
@@ -49,6 +48,25 @@ export default class Post extends Component {
       likers: novaLista
     }
     this.setState({ foto: fotoAtualizada });
+  }
+
+  adicionaComentario() {
+    if (this.state.valorComentario === '')
+      return;
+
+    const novaLista = [...this.state.foto.comentarios, {
+      id: this.state.valorComentario,
+      login: 'meuUsuario',
+      texto: this.state.valorComentario,
+    }];
+
+    const fotoAtualizada = {
+      ...this.state.foto,
+      comentarios: novaLista,
+    }
+
+    this.setState({ foto: fotoAtualizada, valorComentario: '' });
+    this.inputComentario.clear();
   }
 
   exibeLegenda(foto) {
@@ -71,11 +89,11 @@ export default class Post extends Component {
   // }
 
   exibeLikes(likers) {
-    return likers.length > 0 && 
-        <Text style={styles.likes}>
-            {likers.length} {likers.length > 1 ? 'curtidas' : 'curtida'}
-        </Text>
-}
+    return likers.length > 0 &&
+      <Text style={styles.likes}>
+        {likers.length} {likers.length > 1 ? 'curtidas' : 'curtida'}
+      </Text>
+  }
 
   render() {
     const { foto } = this.state;
@@ -93,7 +111,24 @@ export default class Post extends Component {
           </TouchableOpacity>
           {this.exibeLikes(foto.likers)}
           {this.exibeLegenda(foto)}
+          {foto.comentarios.map(comentario =>
+            <View style={styles.comentario} key={comentario.id}>
+              <Text style={styles.tituloComentario}>{comentario.login}</Text>
+              <Text>{comentario.texto}</Text>
+            </View>
+          )}
+         
+         <View style={styles.novoComentario}>
+            <TextInput style={styles.input}
+                placeholder="Adicione um comentĂ¡rio..."
+                ref={input => this.inputComentario = input}
+                onChangeText={texto => this.setState({valorComentario: texto})}/>
 
+            <TouchableOpacity onPress={this.adicionaComentario.bind(this)}>
+              <Image style={styles.icone}
+                  source={require('../../resources/img/send.png')} />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     );
@@ -107,7 +142,7 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   fotoDePerfil: {
-    margin: 10,
+    marginRight: 10,
     borderRadius: 20,
     width: 40,
     height: 40
@@ -118,8 +153,8 @@ const styles = StyleSheet.create({
   },
   botaoDeLike: {
     marginBottom: 10,
-    width: 40,
-    height: 40
+    height: 40,
+    width: 40
   },
   rodape: {
     margin: 10
@@ -133,5 +168,20 @@ const styles = StyleSheet.create({
   tituloComentario: {
     fontWeight: 'bold',
     marginRight: 5
+  },
+  novoComentario: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd'
+  },
+  input: {
+    flexDirection: 'row',
+    flex: 1,
+    height: 40,
+  },
+  icone: {
+    width: 30,
+    height: 30
   }
-})
+});
